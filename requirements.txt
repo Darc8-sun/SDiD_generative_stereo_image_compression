@@ -1,0 +1,36 @@
+# SDiD inference dependencies.
+#
+# Install the torch/torchvision build that matches your CUDA runtime FIRST, e.g.
+#     pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+# then install the rest with
+#     pip install -r requirements.txt
+# The bounds below are deliberately loose so an existing torch build is kept.
+#
+# Do NOT `pip install compressai`: a trimmed subset (entropy models, GDN, ops,
+# CompressionModel) is vendored in ./compressai and would be shadowed by the
+# PyPI package.
+
+# --- core ---
+torch>=2.0.0
+torchvision>=0.15.0
+numpy>=1.24
+Pillow>=9.5.0
+omegaconf>=2.3.0
+einops>=0.7.0
+tqdm>=4.66.0
+
+# --- text encoder (vendored OpenCLIP fetches ViT-H-14 from the Hugging Face hub) ---
+huggingface_hub>=0.20.0
+ftfy>=6.1.1
+regex>=2023.10.3
+
+# --- evaluation metrics ---
+lpips>=0.1.4
+DISTS-pytorch>=0.1.0
+scikit-image>=0.21.0
+matplotlib>=3.7.0
+
+# --- optional ---
+# xformers>=0.0.27      # memory-efficient attention; falls back to plain softmax if absent
+# timm>=0.9.0           # only if you swap in a timm vision tower
+# transformers>=4.35.0  # only if you swap in a Hugging Face text tower
