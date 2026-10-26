@@ -1,0 +1,83 @@
+# SDiD inference configuration.
+# Structural hyper-parameters must match the released checkpoint exactly.
+target: sdid.model.SDiD
+params:
+  # --- diffusion schedule (Stable Diffusion v2.1) ---
+  linear_start: 0.00085
+  linear_end: 0.0120
+  timesteps: 1000
+  channels: 4
+  image_size: 64 # unused, kept for the base class signature
+  scale_factor: 0.18215
+  conditioning_key: crossattn
+  cond_stage_trainable: false
+
+  # --- SDiD specific ---
+  progressive: False
+  samplesteps: 2 # two-step sampling (DPA)
+  control_key: "hint" # unused at inference, kept for the base class
+  only_mid_control: False
+
+  control_stage_config:
+    target: sdid.model.ControlEncoder
+    params:
+      use_checkpoint: True
+      image_size: 32 # unused
+      in_channels: 4
+      out_channels: 4
+      model_channels: 320
+      attention_resolutions: [4, 2, 1]
+      num_res_blocks: 2
+      channel_mult: [1, 2, 4, 4]
+      num_head_channels: 64
+      use_spatial_transformer: True
+      use_linear_in_transformer: True
+      transformer_depth: 1
+      context_dim: 1024
+      legacy: False
+
+  unet_config:
+    target: sdid.model.ControlledUnetModel
+    params:
+      use_checkpoint: True
+      image_size: 32 # unused
+      in_channels: 4
+      out_channels: 4
+      model_channels: 320
+      attention_resolutions: [4, 2, 1]
+      num_res_blocks: 2
+      channel_mult: [1, 2, 4, 4]
+      num_head_channels: 64
+      use_spatial_transformer: True
+      use_linear_in_transformer: True
+      transformer_depth: 1
+      context_dim: 1024
+      legacy: False
+
+  first_stage_config:
+    target: ldm.models.autoencoder.AutoencoderKL
+    params:
+      embed_dim: 4
+      ddconfig:
+        double_z: true
+        z_channels: 4
+        resolution: 256
+        in_channels: 3
+        out_ch: 3
+        ch: 128
+        ch_mult: [1, 2, 4, 4]
+        num_res_blocks: 2
+        attn_resolutions: []
+        dropout: 0.0
+      lossconfig:
+        target: torch.nn.Identity
+
+  cond_stage_config:
+    target: ldm.modules.encoders.modules.FrozenOpenCLIPMultiEmbedder
+    params:
+      arch: "ViT-H-14"
+      # HuggingFace tag of OpenCLIP ViT-H-14, or a path to a local .bin.
+      # Override with `--clip_pretrained`.
+      version: "laion2b_s32b_b79k"
+      freeze: True
+      layer: "penultimate"

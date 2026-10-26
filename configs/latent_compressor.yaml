@@ -1,0 +1,15 @@
+# Latent compressor shared by both views (distributed coding: independent
+# encoders, shared parameters).  Values must match the released checkpoint.
+compress_base:
+  channel_c: [8, 8, 8, 8, 16, 16, 32, 32, 64, 64]
+  M: 256
+  N: 256
+  K: 8
+  cb_size: 32
+  num_slice: 10
+  # 1x1 projections between the residual latent and the VAE latent space.
+  quant_z_channels: 4
+  quant_embed_dim: 4
+  # Directory holding quant.pth / post_quant.pth.  Leave null when the main
+  # checkpoint already carries `compress_model.quant.*`, or pass --quant_ckpt.
+  quant_ckpt: null
